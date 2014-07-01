@@ -40,6 +40,7 @@
     "*data-readers*",
     "*default-data-reader-fn*",
     "*e",
+    "*file*",
     "&",
     "default-data-readers",
     "unquote",
