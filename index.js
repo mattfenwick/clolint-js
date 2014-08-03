@@ -1,5 +1,5 @@
 'use strict';
-
+/*
 var C = require('clojarse-js'),
     dump = C.ast.dump,
     T = require('./lib/checker'),
@@ -30,15 +30,27 @@ if ( ast.status === 'success' ) {
         throw e;
     }
 }
-
+*/
 /*
 fs.writeFile('output', 
     JSON.stringify(parser.parse(input), null, 2),
     {'encoding': 'utf8'});
 */
+
+var M = require('./lib/main'),
+    C = require('clojarse-js'),
+    fs = require('fs');
+
+var input = fs.readFileSync('/dev/stdin', {'encoding': 'utf8'}),
+    ast = C.parseAst(input);
+
+//console.log(JSON.stringify(ast));
+var output = M.traverse(ast.value);
+
+console.log('output: ' + JSON.stringify(output));
 process.stdout.write((typeof output === 'string' ? 
                       output :
-                      JSON.stringify(output))   + "\n");
+                      JSON.stringify(output, null, 2))   + "\n");
 
 
 module.exports = {
