@@ -7,7 +7,7 @@
     "test": "test"
   },
   "dependencies": {
-    "clojarse-js": "0.0.5"
+    "clojarse-js": "0.0.6"
   },
   "devDependencies": {
     "grunt": "~0.4.4",
@@ -16,7 +16,7 @@
     "mocha": "1.18.2"
   },
   "scripts": {
-    "test": "mocha --reporter spec test/ test/parser"
+    "test": "mocha --reporter spec test/"
   },
   "repository": {
     "type": "git",
