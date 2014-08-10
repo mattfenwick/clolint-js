@@ -5,11 +5,8 @@ var M = require('./lib/main'),
     fs = require('fs');
 
 var input = fs.readFileSync('/dev/stdin', {'encoding': 'utf8'}),
-    ast = C.parseAst(input);
-
-//console.log(JSON.stringify(ast));
-//var output = M.traverse(M.node_check)(ast.value);
-var output = M.standard(ast.value);
+    ast = C.parseAst(input),
+    output = M.standard(ast.value);
 
 console.log('output: ' + JSON.stringify(output));
 process.stdout.write((typeof output === 'string' ? 
