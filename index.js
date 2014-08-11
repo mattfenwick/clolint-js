@@ -6,7 +6,7 @@ var M = require('./lib/main'),
 
 var input   = fs.readFileSync('/dev/stdin', {'encoding': 'utf8'}),
     ast     = C.parseAst(input),
-    output  = M.standard(ast.value);
+    output  = ast.fmap(M.standard);
 
 //console.log('output: ' + JSON.stringify(output));
 process.stdout.write((typeof output === 'string' ? 
