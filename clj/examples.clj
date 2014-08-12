@@ -12,12 +12,28 @@
 4/0
 ; char
 \nope
+\ud800
+\udfFf
+\o400
 ; metadata
 ^ :x 3
-^ 3 []
+^ 3 [1 2 3]
 ; table -- even
 {:oops}
 ; eval reader
 #=3
 #=()
-
+; string
+"\400 \377"
+; indentation -- good
+(a b c) ; oneline
+(a b ; match-second
+   c)
+(a b ; ???
+  c)
+(arg ; two-spaces
+  bag
+  cag)
+(arg ; match the first
+ bag
+ agh)
