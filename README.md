@@ -1,4 +1,4 @@
-[clolint-js](http://mattfenwick.github.io/clolint-js/)
+[clolint-js](https://www.npmjs.org/package/clolint-js)
 =================
 
 # Quick start #
