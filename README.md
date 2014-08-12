@@ -1,143 +1,150 @@
 [clolint-js](http://mattfenwick.github.io/clolint-js/)
 =================
 
+# Quick start #
+
+    $ git clone git@github.com:mattfenwick/clolint-js
+    $ cd clolint-js
+    $ cat clj/examples.clj | node index.js > output.json
+
+
+# Overview #
+
+A tool for sanity checking Clojure code, by parsing it and performing various
+static analyses.  I wrote it to help me learn Clojure -- it finds my stupid 
+mistakes!
+
+
+# Examples #
+
+Parse errors such as mismatched or unmatched braces generate traces of 
+line/column information, indicating what the parser was working on when it
+failed:
+
+    $ echo '(a b c' | node index.js
+
+        {
+          "status": "error",
+          "value": {
+            "phase": "parsing",
+            "error information": [
+              ["clojure", [1, 1]],
+              ["list", [1, 1]],
+              ["close", [2, 1]]
+            ]
+          }
+        }
+
+
+Domain checks of forms -- i.e. do the values satisfy Clojure constraints:
+
+    $ echo '{:a} \newlin ^ 3 []' | node index.js
+
+        {
+          "status": "success",
+          "value": [
+            {
+              "number": 1,
+              "severity": "error",
+              "message": "uneven number of elements in table",
+              "position": [1, 1]
+            },
+            {
+              "value": "newlin",
+              "severity": "error",
+              "message": "invalid long char",
+              "position": [1, 6]
+            },
+            {
+              "type": "integer",
+              "severity": "error",
+              "message": "invalid metadata type",
+              "position": [1, 16]
+            }
+          ]
+        }
+
+
+Special form syntax:
+
+    $ echo '(def x :docs 4)' | node index.js
+
+        {
+          "status": "success",
+          "value": [
+            {
+              "severity": "error",
+              "name": "def",
+              "message": "in 4-arg version, doc-string must be a string",
+              "position": [1, 8]
+            }
+          ]
+        }
+
+    
+Anonymous functions and arguments:
+
+    $ echo '%x #(%a)' | node index.js
+    
+        {
+          "status": "success",
+          "value": [
+            {
+              "symbol": "%x",
+              "severity": "warning",
+              "message": "%-args should not be used outside of #-shorthand functions",
+              "position": [1, 1]
+            },
+            {
+              "error": [["token", [1, 7]]],
+              "text": "%a",
+              "severity": "error",
+              "message": "invalid %-arg",
+              "position": [1, 6]
+            }
+          ]
+        }
+
+
+    $ echo '#(a #(b %1) %)' | node index.js
+
+        {
+          "status": "success",
+          "value": [
+            {
+              "positions": [[1, 1]],
+              "severity": "error",
+              "message": "nested shorthand function",
+              "position": [1, 5]
+            }
+          ]
+        }
+
+
+(TODO) Macro and function syntax
+
+    $ echo '(fn)' | node index.js
+    
+    ... TODO ...
+
+(TODO) Indentation
+
+(TODO) Symbol definitions: unused, undefined, redefined, shadowed
+
+
 # Other resources #
 
  - [the CCW ANTLR grammar](https://github.com/laurentpetit/ccw) 
  - [the Clojure implementation](https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/LispReader.java)
+ - [the parsing library](https://github.com/mattfenwick/clojarse-js)
 
 
-# Structural parsing #
+# License #
 
-Goal: correctly break input into tokens and hierarchical forms, but don't
-worry about verifying that tokens have the correctly internal structure.
-Just make sure the right amount of text is matched for each token.
+MIT.  Please don't use it for evil.
 
 
+# Contributing #
 
-# Token parsing #
-
-Goal: determine the internal structure of the number, ident,
-char, string, and regex tokens
-
-
-
-# Static token constraints #
-
-### String ###
-
-octal escape
-
- - value must be less than `8r400` 
-
-### Regex ###
-
- - uses `java.util.regex.Pattern.compile` for definition of accepted input
-
-### Ratio ###
-
-denominator != 0
-
-### Integer ###
-
-custom base: radix must be <= 36, digits must be within range of radix
-
-### Float ###
-
-big decimal overflow/underflow: exponent limited to Java Integer range:
-see http://docs.oracle.com/javase/7/docs/api/java/math/BigDecimal.html#BigDecimal(java.lang.String)
-
-### Symbol ###
-
-### Keyword, auto-keyword ###
-
-### Reserved ###
-
-### Char ###
-
-octal escape
-
- - <= 255
- 
-unicode escape: value can *not* be between u+D800 and u+DFFF
-
-    \uDFFF              ; -> error
-    (first "\uDFFF")    ; -> not an error -- it's okay in strings
-
-
-
-# Further constraints #
-
-## Var ##
-
- - must be a symbol -- [ref](http://clojure.org/special_forms#var)
-
-## Metadata ##
-
-in `^ {} {}`:
-
- - metadata must be symbol, keyword, auto keyword, string, or map
- - value must implement IMeta
- 
-invalid:
- 
- - `^ 3 {}` 
- - `^ {} 3`
-
-doesn't implement IMeta:
-
- - number
- - string
- - reserved
- - regex
- - char
-
-does implement IMeta:
-
- - symbol
- - set
- - function
- - table
- - list
- - vector
-
-
-
-# Linting #
-
-## Definitely ##
-
- - repeated name usage in function or let parameter lists
- 
-        (defn f [x x] x)
-        (fn [x x] x)
-        (let [x 1 x 2] x)
-
- - no nested shorthand functions
- 
-        #(map #(+ 1 %1) %1)
-
- - `%...` variables names inside shorthand functions
-
- - eval reader -- `#=xyz` -- permits only a symbol or a non-empty list
- 
-## Not sure ##
-
-  - variables defined, used, used but not defined, defined but not used
-  - formatting -- consistent indentation
-  - ?shadowing?
-  - known special forms and functions: correct syntax used
-  - maximum number of function parameters, maximum nesting level
-  - operator position is treated specially with respect to special forms:
-  
-        (let [def 1] def)        ; ==> okay
-        
-        ((fn [def] (def 2 3)) +) ; ==> error
-
-## Potential warnings ##
-
-Breaking these isn't illegal, but may indicate an error even if the syntax is okay,
-or may cause an undetected error which confusingly doesn't show up until later:
-
-  - string, regex, number, ident, char followed by whitespace
+Features, patches, ideas, corrections are all welcome!
 
