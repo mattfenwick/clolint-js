@@ -15,14 +15,16 @@
 ; bad
 (a
   b
-  c)  ()
+  c)  () ; ( at column 7, instead of column 1
 
-( a b c)
+( a b c) ; a at column 3 instead of column 2
 
- (a)
+ (a) ; ( at column 2 instead of 1
+
+       (a) ; 
 
 (
- a)
+ a) ; a should be on same line as (
 
-(a
+(a ; ) should immediately follow a
 )
