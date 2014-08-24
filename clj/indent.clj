@@ -28,3 +28,6 @@
 
 (a ; ) should immediately follow a
 )
+
+(
+ ) ; empty struct: open and close on same line
