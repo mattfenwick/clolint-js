@@ -44,5 +44,29 @@ module("main", function() {
         deepEqual(true, false, 'parsing failed');
     }
 
+    var indent_text = fs.readFileSync('clj/indent.clj', {'encoding': 'utf8'}),
+        indent_ast = C.parseCst(indent_text);
+    var indent_messages = [
+        'top-level forms must start at the first column',
+        'bad indentation -- close brace of empty structure should be on same line as opening brace',
+        'top-level forms must start at the first column',
+        'top-level forms must start at the first column',
+        'bad indentation -- first form should be on same line as opening brace',
+        'bad indentation -- closing punctuation should appear on same line as last form',
+        'bad indentation -- close brace of empty structure should be on same line as opening brace'
+        ];
+    if ( indent_ast.status === 'success' ) {
+        var indent_checks = M.cstChecks(indent_ast.value);
+        indent_checks.map(function(c, ix) {
+            var m = indent_messages[ix];
+            test(ix + ': "' + c.message + '" -- "' + indent_messages[ix] + '"', function() {
+                deepEqual(c.message, indent_messages[ix]);
+                // TODO check the position as well
+            });
+        });
+    } else {
+        deepEqual(true, false, 'indentation parsing failed');
+    }
+
 });
 
