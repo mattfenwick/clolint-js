@@ -47,23 +47,38 @@ module("main", function() {
     var indent_text = fs.readFileSync('clj/indent.clj', {'encoding': 'utf8'}),
         indent_ast = C.parseCst(indent_text);
     var indent_messages = [
-        'top-level forms must start at the first column',
-        'bad indentation -- close brace of empty structure should be on same line as opening brace',
-        'top-level forms must start at the first column',
-        'top-level forms must start at the first column',
-        'bad indentation -- first form should be on same line as opening brace',
-        'bad indentation -- closing punctuation should appear on same line as last form',
-        'bad indentation -- close brace of empty structure should be on same line as opening brace'
+        [[18,7], 'top-level forms must start at the first column'                           ],
+        [[20,1], 'bad indentation -- first form should immediately follow opening brace'    ],
+        [[22,2], 'top-level forms must start at the first column'                           ],
+        [[24,8], 'top-level forms must start at the first column'                           ],
+        [[26,1], 'bad indentation -- first form should immediately follow opening brace'    ],
+        [[29,1], 'bad indentation -- closing brace should immediately follow last form'     ],
+        [[32,1], 'bad indentation -- closing brace of empty structure should immediately follow opening brace'],
+        [[35,1], 'bad indentation -- closing brace should immediately follow last form'     ],
+        [[37,1], 'bad indentation -- closing brace should immediately follow last form'     ],
+        [[,], 'bad indentation'],
         ];
     if ( indent_ast.status === 'success' ) {
         var indent_checks = M.cstChecks(indent_ast.value);
-        indent_checks.map(function(c, ix) {
-            var m = indent_messages[ix];
-            test(ix + ': "' + c.message + '" -- "' + indent_messages[ix] + '"', function() {
-                deepEqual(c.message, indent_messages[ix]);
-                // TODO check the position as well
-            });
+//        console.log(JSON.stringify(indent_checks));
+        indent_messages.map(function(m, ix) {
+            try {
+                var c = indent_checks[ix];
+                test(ix + ': "' + c.message + '" -- "' + m[1] + '"', function() {
+                    deepEqual(c.message, m[1]);
+                    // TODO check the position as well
+                });
+            } catch (e) {
+                test(JSON.stringify(m), function() {
+                    deepEqual(false, true, e.message);
+                });
+            }
         });
+        for (var ix = indent_messages.length; ix < indent_checks.length; ix++) {
+            test(indent_checks[ix].message, function() {
+                deepEqual(true, false);
+            });
+        }
     } else {
         deepEqual(true, false, 'indentation parsing failed');
     }

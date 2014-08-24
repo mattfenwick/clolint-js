@@ -15,13 +15,13 @@
 ; bad
 (a
   b
-  c)  () ; ( at column 7, instead of column 1
+  c)  () ; ( should be at column 1
 
-( a b c) ; a at column 3 instead of column 2
+( a b c) ; a should be at column 2
 
  (a) ; ( at column 2 instead of 1
 
-       (a) ; 
+       (a) ; ( should be at column 1
 
 (
  a) ; a should be on same line as (
@@ -31,3 +31,12 @@
 
 (
  ) ; empty struct: open and close on same line
+
+(a ) ; ) should be at column 3
+
+[() () ] ; ] should be at column 7
+
+{a
+  b
+     c}
+
