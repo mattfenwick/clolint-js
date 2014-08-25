@@ -8,20 +8,24 @@ var input   = fs.readFileSync('/dev/stdin', {'encoding': 'utf8'}),
     m_cst   = C.parseCst(input),
     cst,
     ast,
-    errs,
     output;
+
+function getCheckNames(args) {
+    if ( args[0] === 'all' ) {
+        return Object.keys(M.checks);
+    }
+    return args;
+}
 
 if ( m_cst.status !== 'success' ) {
     output = {'phase': 'CST parsing', 'error information': m_cst.value};
 } else {
     // it's safe to unwrap cst b/c we just checked the case above
     cst = m_cst.value;
-    ast = C.cstToAst(m_cst.value);
-    errs = M.cstChecks(cst);
-    errs = errs.concat(M.standard(ast));
-    output = errs;
+    ast = C.cstToAst(cst);
+    output = M.driver(cst, ast, getCheckNames(process.argv.slice(2)));
 }
-//console.log('output: ' + JSON.stringify(output));
+
 process.stdout.write(JSON.stringify(output, null, 2) + "\n");
 
 
