@@ -1,6 +1,6 @@
 {
   "name": "clolint-js",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "parsing and linting of Clojure code",
   "main": "index.js",
   "directories": {
