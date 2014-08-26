@@ -1,14 +1,8 @@
 'use strict';
 
 var M = require('./lib/main'),
-    C = require('clojarse-js'),
-    fs = require('fs');
+    C = require('clojarse-js');
 
-var input   = fs.readFileSync('/dev/stdin', {'encoding': 'utf8'}),
-    m_cst   = C.parseCst(input),
-    cst,
-    ast,
-    output;
 
 function getCheckNames(args) {
     if ( args[0] === 'all' ) {
@@ -17,19 +11,17 @@ function getCheckNames(args) {
     return args;
 }
 
-if ( m_cst.status !== 'success' ) {
-    output = {'phase': 'CST parsing', 'error information': m_cst.value};
-} else {
-    // it's safe to unwrap cst b/c we just checked the case above
-    cst = m_cst.value;
-    ast = C.cstToAst(cst);
-    output = M.driver(cst, ast, getCheckNames(process.argv.slice(2)));
+function run(text, args) {
+    return C.parseCst(text).fmap(function(cst) {
+        var ast = C.cstToAst(cst);
+        return M.driver(cst, ast, getCheckNames(args));
+    });
 }
-
-process.stdout.write(JSON.stringify(output, null, 2) + "\n");
 
 
 module.exports = {
-
+    'getCheckNames': getCheckNames,
+    'run'          : run          ,
+    // TODO could import all modules here, too, although that's not too important
 };
 
