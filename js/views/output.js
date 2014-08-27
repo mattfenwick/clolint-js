@@ -18,7 +18,8 @@ Output.prototype.render = function(result) {
     this.elem.empty();
 //    this.elem.clear();
 //    this.elem.val(...)?
-    this.elem.text(JSON.stringify(result));
+    var tree = H.elem('pre', {}, [JSON.stringify(result, null, 2)]);
+    this.elem.append(S.serialize(tree));
 };
 
 module.exports = Output;

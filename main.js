@@ -6,6 +6,8 @@ var V = require('./js/models/validation'),
     O = require('./js/views/output'),
     jQuery = require('jquery');
 
+// to make debugging easier
+window.$ = jQuery;
 
 var model = new V(),
     output = new O(jQuery("#output"));
