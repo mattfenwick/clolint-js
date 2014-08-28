@@ -54,15 +54,16 @@ module("main", function() {
             m_cst = C.parseCst(text);
         var messages = [
             [[18,7], 'top-level forms must start at the first column'                           ],
-            [[20,1], 'bad indentation -- first form should immediately follow opening brace'    ],
+            [[20,3], 'bad indentation -- first form should immediately follow opening brace'    ],
             [[22,2], 'top-level forms must start at the first column'                           ],
             [[24,8], 'top-level forms must start at the first column'                           ],
-            [[26,1], 'bad indentation -- first form should immediately follow opening brace'    ],
-            [[29,1], 'bad indentation -- closing brace should immediately follow last form'     ],
-            [[32,1], 'bad indentation -- closing brace of empty structure should immediately follow opening brace'],
-            [[35,1], 'bad indentation -- closing brace should immediately follow last form'     ],
-            [[37,1], 'bad indentation -- closing brace should immediately follow last form'     ],
-            [[,], 'bad indentation'],
+            [[27,2], 'bad indentation -- first form should immediately follow opening brace'    ],
+            [[30,1], 'bad indentation -- closing brace should immediately follow last form'     ],
+            [[33,2], 'bad indentation -- closing brace of empty structure should immediately follow opening brace'],
+            [[35,4], 'bad indentation -- closing brace should immediately follow last form'     ],
+            [[37,8], 'bad indentation -- closing brace should immediately follow last form'     ],
+            [[41,6], 'bad indentation'                                                          ],
+            [[43,3], 'bad indentation -- closing brace of empty structure should immediately follow opening brace'],
             ];
         m_cst.fmap(function(cst) {
             var checks = M.checks['indentation'][1](cst);
@@ -72,7 +73,7 @@ module("main", function() {
                     var c = checks[ix];
                     test(ix + ': "' + c.message + '" -- "' + m[1] + '"', function() {
                         deepEqual(c.message, m[1]);
-                        // TODO check the position as well
+                        deepEqual(c.position, m[0]);
                     });
                 } catch (e) {
                     test(JSON.stringify(m), function() {
