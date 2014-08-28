@@ -26,9 +26,10 @@ function getEnd(node) {
 function struct(node) {
     var errs = [];
     if ( node.body.length === 0 ) {
-        if ( node.open._start[0] !== node.close._end[0] ) {
+        if ( ( node.open._end[0] !== node.close._start[0] ) ||
+             ( node.open._end[1] !== node.close._start[1] ) ) {
             errs.push(warning('bad indentation -- closing brace of empty structure should immediately follow opening brace',
-                              node._start, {'element': node._end}));
+                              node.close._start, {}));
         }
         return errs;
     }
@@ -39,7 +40,7 @@ function struct(node) {
     if ( ( node.open._end[0] !== first._start[0] ) ||
          ( node.open._end[1] !== first._start[1] ) ) {
         errs.push(warning('bad indentation -- first form should immediately follow opening brace',
-                          node._start, {'element': first._start}));
+                          first._start, {}));
     }
     errs = errs.concat(indentation(first));
     // rest
@@ -54,7 +55,7 @@ function struct(node) {
         } else if ( prev._start[1] === self._start[1] ) { // same column as previous
             // pass
         } else {
-            errs.push(warning('bad indentation', node._start, {'element': self._start}));
+            errs.push(warning('bad indentation', self._start, {}));
         }
         errs = errs.concat(indentation(self));
         prev = self;
@@ -64,16 +65,18 @@ function struct(node) {
     if ( ( nodeEnd[0] !== node.close._start[0] ) ||
          ( nodeEnd[1] !== node.close._start[1] ) ) {
         errs.push(warning('bad indentation -- closing brace should immediately follow last form',
-                          node._start, {'element': prev._start}));
+                          node.close._start, {}));
     }
     return errs;
 }
 
 function clojure(node) {
-    var errs = [];
+    var errs = [],
+        start;
     for (var i = 0; i < node.forms.length; i++) {
-        if ( node.forms[i]._start[1] !== 1 ) { // have to be in first column
-            errs.push(warning('top-level forms must start at the first column', node._start, {'element': node.forms[i]._start}));
+        start = node.forms[i]._start;
+        if ( start[1] !== 1 ) {
+            errs.push(warning('top-level forms must start at the first column', start, {}));
         }
         errs = errs.concat(indentation(node.forms[i]));
     }

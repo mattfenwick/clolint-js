@@ -16,7 +16,7 @@ var checks = {
     'singleform'    : ['ast', S.run  ],
     'specials'      : ['ast', Sp.run ],
     'functions'     : ['ast', F.run  ],
-    'symbols'       : ['ast', symbols],
+//    'symbols'       : ['ast', symbols], // disactivated because it's annoying
 };
 
 function driver(cst, ast, checkNames) {

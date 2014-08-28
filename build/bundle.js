@@ -32,7 +32,7 @@ module.exports = V;
 function Input(button, elem, model) {
     button.click(function() {
         // TODO read these args from the UI (checkboxes)
-        var args = ['indentation', 'singleform', 'specials', 'functions', 'symbols'];
+        var args = ['indentation', 'singleform', 'specials', 'functions'];
         model.input(elem.val(), args);
         elem.removeClass('changed');
     });
@@ -245,9 +245,10 @@ function getEnd(node) {
 function struct(node) {
     var errs = [];
     if ( node.body.length === 0 ) {
-        if ( node.open._start[0] !== node.close._end[0] ) {
+        if ( ( node.open._end[0] !== node.close._start[0] ) ||
+             ( node.open._end[1] !== node.close._start[1] ) ) {
             errs.push(warning('bad indentation -- closing brace of empty structure should immediately follow opening brace',
-                              node._start, {'element': node._end}));
+                              node.close._start, {}));
         }
         return errs;
     }
@@ -258,7 +259,7 @@ function struct(node) {
     if ( ( node.open._end[0] !== first._start[0] ) ||
          ( node.open._end[1] !== first._start[1] ) ) {
         errs.push(warning('bad indentation -- first form should immediately follow opening brace',
-                          node._start, {'element': first._start}));
+                          first._start, {}));
     }
     errs = errs.concat(indentation(first));
     // rest
@@ -273,7 +274,7 @@ function struct(node) {
         } else if ( prev._start[1] === self._start[1] ) { // same column as previous
             // pass
         } else {
-            errs.push(warning('bad indentation', node._start, {'element': self._start}));
+            errs.push(warning('bad indentation', self._start, {}));
         }
         errs = errs.concat(indentation(self));
         prev = self;
@@ -283,16 +284,18 @@ function struct(node) {
     if ( ( nodeEnd[0] !== node.close._start[0] ) ||
          ( nodeEnd[1] !== node.close._start[1] ) ) {
         errs.push(warning('bad indentation -- closing brace should immediately follow last form',
-                          node._start, {'element': prev._start}));
+                          node.close._start, {}));
     }
     return errs;
 }
 
 function clojure(node) {
-    var errs = [];
+    var errs = [],
+        start;
     for (var i = 0; i < node.forms.length; i++) {
-        if ( node.forms[i]._start[1] !== 1 ) { // have to be in first column
-            errs.push(warning('top-level forms must start at the first column', node._start, {'element': node.forms[i]._start}));
+        start = node.forms[i]._start;
+        if ( start[1] !== 1 ) {
+            errs.push(warning('top-level forms must start at the first column', start, {}));
         }
         errs = errs.concat(indentation(node.forms[i]));
     }
@@ -347,7 +350,7 @@ var checks = {
     'singleform'    : ['ast', S.run  ],
     'specials'      : ['ast', Sp.run ],
     'functions'     : ['ast', F.run  ],
-    'symbols'       : ['ast', symbols],
+//    'symbols'       : ['ast', symbols], // disactivated because it's annoying
 };
 
 function driver(cst, ast, checkNames) {
@@ -2765,15 +2768,31 @@ function elem(name, attrs, kids) {
 module.exports = {
     'root'    : root,
     'comment' : function(text) {return new model.Comment(text);},
+
     'html'  : tag('html'),
+    'title' : tag('title'),
     'body'  : tag('body'),
     'head'  : tag('head'),
+
     'div'   : tag('div'),
-    'td'    : tag('td'),
-    'th'    : tag('th'),
-    'tr'    : tag('tr'),
+    'p'     : tag('p')  ,
+    'pre'   : tag('pre'),
+    
+    'ul'    : tag('ul'),
+    'ol'    : tag('ol'),
+    'li'    : tag('li'),
+
     'table' : tag('table'),
-    'elem'  : elem
+    'tr'    : tag('tr'),
+    'th'    : tag('th'),
+    'td'    : tag('td'),
+    'tbody' : tag('tbody'),
+    'tfoot' : tag('tfoot'),
+    'thead' : tag('thead'),
+    
+    // escape hatches
+    'tag'   : tag,
+    'elem'  : elem,
 };
 
 
@@ -2825,6 +2844,11 @@ function Attribute(key, value) {
     } else {
         throw new Error('illegal key -- ' + key);
     }
+    if ( ( value === null ) || ( typeof value === 'string' ) ) {
+        // we're cool
+    } else {
+        throw new Error('illegal value -- ' + value);
+    }
     this.value = value; // anything?  can even be empty?
 }
 
@@ -2872,13 +2896,13 @@ function ser_elem(node, lines, spaces) {
         attrs = [];
     node.attrs.map(function(a) {
         if ( a.value === null ) {
-            attrs.push(a.key);
+            attrs.push(' ' + a.key);
         } else {
-            attrs.push(a.key + '="' + escape(a.value) + '"');
+            attrs.push(' ' + a.key + '="' + escape(a.value) + '"');
         }
     });
     
-    lines.push(spaces + '<' + node.name + ' ' + attrs.join(' ') + '>');
+    lines.push(spaces + '<' + node.name + attrs.join('') + '>');
     
     node.children.map(function(c) {
         _serialize(c, lines, nextSize);

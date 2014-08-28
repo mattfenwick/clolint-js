@@ -3,7 +3,7 @@
 function Input(button, elem, model) {
     button.click(function() {
         // TODO read these args from the UI (checkboxes)
-        var args = ['indentation', 'singleform', 'specials', 'functions', 'symbols'];
+        var args = ['indentation', 'singleform', 'specials', 'functions'];
         model.input(elem.val(), args);
         elem.removeClass('changed');
     });
