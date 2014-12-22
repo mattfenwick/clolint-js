@@ -7,7 +7,7 @@
     "test": "test"
   },
   "dependencies": {
-    "clojarse-js": "0.1.2",
+    "clojarse-js": "0.2.0",
     "data-js"    : "0.1.1"
   },
   "devDependencies": {
