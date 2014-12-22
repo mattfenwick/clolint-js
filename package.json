@@ -1,6 +1,6 @@
 {
   "name": "clolint-js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "parsing and linting of Clojure code",
   "main": "index.js",
   "directories": {
@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "clojarse-js": "0.2.0",
-    "data-js"    : "0.1.1"
+    "data-js": "0.1.1"
   },
   "devDependencies": {
     "grunt": "~0.4.4",
